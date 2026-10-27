@@ -97,13 +97,28 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 .fab .t small{display:block;font:400 12px var(--sans);color:#B5AD9C;margin-top:2px}
 @media(max-width:560px){.fab{padding:6px;right:16px}.fab .t{display:none}}
 @media(prefers-reduced-motion:reduce){#loader{display:none}.fab{animation:none;opacity:1}.fab .ic::after{display:none}}
+.js .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
+.hero>div:first-child{animation:fin 1s ease 2.4s both}
+.prog{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:2px;background:var(--gold);transform-origin:left;transform:scaleX(var(--p,0));z-index:40}
+.rv{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+.rc{border:1px solid var(--line);padding:30px 28px 28px}
+.rc::before{content:"\201C";display:block;font:400 76px/1 var(--serif);color:var(--gold);height:40px}
+.rc p{font:italic 400 22px/1.4 var(--serif);margin:0 0 22px}
+.rc b{display:block;font:500 16px var(--sans)}
+.rc small{color:var(--muted);font-size:14px}
+#reviewWidget{margin-top:40px}
+@media(max-width:860px){.rv{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none;transition:none}.hero>div:first-child{animation:none}}
 </style>
+<script>document.documentElement.className+=" js";</script>
 </head>
 <body>
 <div id="loader" aria-hidden="true"><div class="lw"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="#D4AF6A" stroke-width="1.2" pathLength="1"/></svg><span class="lt">TS</span></div><p class="ln">THE SAI PRODUCTION</p><p class="ls">Wedding photographer in Faridabad</p></div>
+<div class="prog" id="prog" aria-hidden="true"></div>
 <header><div class="wrap bar">
   <a class="logo" href="#top" aria-label="The Sai Production home"><span class="mono">TS</span><span class="name">THE SAI PRODUCTION<small>Wedding photographer in Faridabad</small></span></a>
-  <nav><a href="#work">Our work</a><a href="#films">Films</a><a href="#about">About</a><a class="btn" href="#enquire">Enquire</a></nav>
+  <nav><a href="#work">Our work</a><a href="#films">Films</a><a href="#reviews">Reviews</a><a href="#about">About</a><a class="btn" href="#enquire">Enquire</a></nav>
 </div></header>
 
 <main id="top">
@@ -131,6 +146,14 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <div class="frame letter" id="filmFrame" style="--a0:#0d1117;--a1:#2b3a4a;--a2:#d4af6a"></div>
 </div></section>
 
+<section class="wrap sec" id="reviews">
+  <h2>Client love</h2>
+  <p class="sub">Kind words from the couples and families we have had the joy of photographing.</p>
+  <div class="rv" id="rv"></div>
+  <!-- PASTE YOUR GOOGLE REVIEWS WIDGET CODE INSIDE THE DIV BELOW (optional) -->
+  <div id="reviewWidget"></div>
+</section>
+
 <section class="wrap sec" id="about"><div class="about">
   <h2>Premium work, personally managed.</h2>
   <div>
@@ -148,6 +171,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     <div><label for="t">Type of shoot</label><select id="t"></select></div>
     <div><label for="d">Event date</label><input id="d" type="date"></div>
     <div><label for="l">City or venue</label><input id="l"></div>
+    <div class="full"><label for="b">Your approximate budget (optional)</label><input id="b" placeholder="For example, ₹75,000 or 1 to 1.5 lakh"></div>
     <div class="full"><label for="m">Anything else we should know</label><textarea id="m"></textarea></div>
     <div class="full"><button class="btn" type="submit">Send on WhatsApp</button></div>
   </form>
@@ -177,6 +201,13 @@ const C = [
  {t:"Events", d:"Parties, launches and family functions, covered discreetly.", photo:"", a:["#231F3A","#6A5FB0","#E6D6F2"]},
  {t:"Fashion", d:"Editorial looks for models, designers and brands.", photo:"", a:["#141414","#7A1F2B","#D4AF6A"]},
  {t:"Commercial", d:"Product and brand images that look worth the price.", photo:"", a:["#1B2A33","#3F7F8F","#DFE8E6"]}
+];
+/* Your client reviews. Copy real ones from your Google profile.
+   Remove sample:true once a card holds a real review. */
+const REVIEWS = [
+ {name:"Ananya & Rohan", event:"Wedding, Haryana", text:"Harsh and his team captured every ritual beautifully. We cried happy tears while watching our album.", sample:true},
+ {name:"Simran Kaur", event:"Pre-wedding shoot, Haryana", text:"We were nervous in front of the camera, but he made us so comfortable. The photos look straight out of a film.", sample:true},
+ {name:"Priya Malhotra", event:"Birthday shoot, Haryana", text:"Calm, professional and always on time. The pictures reached us sooner than we expected.", sample:true}
 ];
 /* ========= END OF EDIT AREA ========= */
 
@@ -229,12 +260,44 @@ $("filmBtn").addEventListener("click", () => { sel.value = "Wedding films"; });
 $("fab").href = wa("Hello The Sai Production, I would like to check availability for my event date.");
 setTimeout(() => { const l = $("loader"); if (l) l.remove(); }, 3400);
 
+REVIEWS.forEach(r => {
+  const a = document.createElement("article"); a.className = "rc";
+  const p = document.createElement("p"); p.textContent = r.text;
+  const b = document.createElement("b"); b.textContent = r.name;
+  const s = document.createElement("small"); s.textContent = r.event + (r.sample ? " (sample review)" : "");
+  a.append(p, b, s); $("rv").appendChild(a);
+});
+
+/* Scroll animations */
+const items = document.querySelectorAll(".sec h2,.sec .sub,.card,.films .two>*,.about>*,form>div,.rc,#reviewWidget");
+items.forEach(el => {
+  el.classList.add("reveal");
+  el.style.transitionDelay = (Array.from(el.parentNode.children).indexOf(el) % 3) * 120 + "ms";
+});
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold: .15, rootMargin: "0px 0px -6% 0px"});
+  items.forEach(el => io.observe(el));
+} else { items.forEach(el => el.classList.add("in")); }
+
+const prog = $("prog"), stack = $("stack");
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let tick = false;
+function onScroll() {
+  tick = false;
+  const h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+  prog.style.setProperty("--p", max > 0 ? (scrollY / max).toFixed(4) : 0);
+  if (!still && scrollY < 900) stack.style.transform = "translateY(" + (scrollY * 0.07).toFixed(1) + "px)";
+}
+addEventListener("scroll", () => { if (!tick) { tick = true; requestAnimationFrame(onScroll); } }, {passive: true});
+onScroll();
+
 $("form").addEventListener("submit", e => {
   e.preventDefault();
   let m = "Hello The Sai Production, my name is " + $("n").value + ". I would like to book a " + sel.value + " shoot";
   if ($("d").value) m += " on " + $("d").value;
   if ($("l").value) m += " in " + $("l").value;
   m += ".";
+  if ($("b").value) m += " My approximate budget is " + $("b").value + ".";
   if ($("m").value) m += " " + $("m").value;
   window.open(wa(m), "_blank", "noopener");
 });
